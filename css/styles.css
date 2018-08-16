@@ -317,11 +317,6 @@ nav h1 a {
     width: calc((100% - 9.9em) / 3);
   }
 
-   #reviews-list li {
-    margin: 0.5em;
-    width: calc((100% - 9.9em) / 3);
-  }
-
 }
 
 @media screen and (min-width: 1280px) {
