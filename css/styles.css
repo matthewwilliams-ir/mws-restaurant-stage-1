@@ -241,7 +241,7 @@ nav h1 a {
   font-size: 20pt;
   font-weight: 200;
   letter-spacing: 0;
-  margin: 15px 0 30px;
+	margin: 0.7em 1.0em;
   text-transform: uppercase;
   line-height: 1.1;
 }
@@ -252,7 +252,8 @@ nav h1 a {
 
 #restaurant-address {
   font-size: 12pt;
-  margin: 10px 0px;
+	padding: 0 1em;
+	margin: 1em 0 0.5em;
 }
 
 #restaurant-cuisine {
@@ -261,8 +262,7 @@ nav h1 a {
   font-size: 12pt;
   font-weight: 300;
   letter-spacing: 10px;
-  margin: 0 0 20px;
-  padding: 2px 0;
+  margin: 0;
   text-align: center;
   text-transform: uppercase;
 }
@@ -302,15 +302,20 @@ nav h1 a {
   border: 2px solid #f3f3f3;
   display: block;
   list-style-type: none;
-  margin: 0 0 30px;
+  margin: 0 0.5em;
   overflow: hidden;
-  padding: 0 20px 20px;
+  padding: 0 1em;
   position: relative;
   width: calc(100% - 3.3em);
 }
 
 #reviews-list li p {
   margin: 0 0 10px;
+}
+
+#restaurant-hours {
+	padding: 1em;
+	margin: 0.5em;
 }
 
 #restaurant-hours td {
@@ -333,7 +338,7 @@ nav h1 a {
 
   .filter-options select,
   .filter-options h2 {
-    width: calc((100% - 3 * 40px) / 3);
+    width: calc((100% - 3 * 40px) / 3s);
   }
 
 	#restaurants-list li {
@@ -348,6 +353,10 @@ nav h1 a {
 @media screen and (min-width: 900px) {
 
 	#restaurants-list li {
+    width: calc((100% - 9.9em) / 3);
+  }
+
+	#reviews-list li {
     width: calc((100% - 9.9em) / 3);
   }
 }
