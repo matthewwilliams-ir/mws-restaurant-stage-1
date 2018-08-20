@@ -45,10 +45,6 @@ self.addEventListener('fetch', event => {
 
   var requestUrl = new URL(event.request.url);
 
-  if (requestUrl.origin === "https://api.tiles.mapbox.com") {
-    return;
-  }
-
   event.respondWith(
     caches.match(event.request).then(response => {
       return response || fetch(event.request, {
