@@ -1,0 +1,6 @@
+# build, dist, & tmp directories
+build/
+dist/
+tmp/
+node_modules/
+package-lock.json

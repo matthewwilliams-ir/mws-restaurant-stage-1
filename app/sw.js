@@ -1,3 +1,5 @@
+import idb from 'idb';
+
 const staticCacheName = 'restaurant-info-v3';
 const urlsToCache = [
   '/',
@@ -33,6 +35,29 @@ const urlsToCache = [
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css'
 ];
 
+const dbPromise = idb.open("restaurant-db", 1, upgradeDB => {
+  switch (upgradeDB.oldVersion) {
+    case 0:
+      upgradeDB.createObjectStore('restaurants');
+  }
+});
+
+const idbKeyval = {
+  get(key) {
+    return dbPromise.then(db => {
+      return db.transaction('restaurants')
+        .objectStore('restaurants').get(key);
+    });
+  },
+  set(key, val) {
+    return dbPromise.then(db => {
+      const tx = db.transaction('restaurants', 'readwrite');
+      tx.objectStore('restaurants').put(val, key);
+      return tx.complete;
+    });
+  }
+};
+
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(staticCacheName).then(cache => {
@@ -45,15 +70,39 @@ self.addEventListener('fetch', event => {
 
   var requestUrl = new URL(event.request.url);
 
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request, {
-        mode: 'no-cors'
-      });
-    })
-  );
-
+  if (requestUrl.port === '1337') {
+    event.respondWith(idbResponse(event.request));
+  } else {
+    event.respondWith(cachesResponse(event.request));
+  }
 });
+
+function cacheResponse(request) {
+  return caches.match(request).then(response => {
+    return response || fetch(request, {
+      mode: 'no-cors'
+    });
+  }).catch(error => new Response(error));
+}
+
+function idbResponse(request) {
+  return idbKeyval.get("restaurants").then(restaurants => {
+    return (restaurants || fetch(request)
+      .then(response => response.json())
+      .then(json => {
+        idbKeyval.set("restaurants", json);
+        return json;
+      })
+    );
+  })
+  .then(response => new Response(JSON.stringify(response)))
+  .catch(error => {
+    return new Response(error, {
+      status: 400,
+      statusText: 'Error fetching data from IDB.'
+    });
+  });
+}
 
 self.addEventListener('message', event => {
   if (event.data.action === 'skipWaiting') {
