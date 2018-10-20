@@ -47,7 +47,7 @@ gulp.task('html', () => {
 	.pipe(gulp.dest('tmp'))
 });
 
-gulp.task('serve', ['clean', 'default'], function () {
+gulp.task('serve', ['clean', 'default'], () => {
   return gulp.src("tmp")
     .pipe(webserver({
       port: 3000,
@@ -55,18 +55,28 @@ gulp.task('serve', ['clean', 'default'], function () {
     }));
 });
 
-gulp.task('images', () => {
+gulp.task('images', ['icons'], () => {
 	return gulp.src(['app/img/*.jpg'])
 	.pipe(imagemin())
 	.pipe(gulp.dest('tmp/img'))
 });
 
-gulp.task('manifest', () => {
-	return gulp.src(['app/manifest/*'])
-	.pipe(gulp.dest('tmp/manifest'))
+gulp.task('icons', function () {
+  return gulp.src('app/img/icons/**')
+    .pipe(gulp.dest('tmp/img/icons'))
 });
 
-gulp.task('clean', function () {
+// gulp.task('manifest', () => {
+// 	return gulp.src(['app/manifest/*'])
+// 	.pipe(gulp.dest('tmp/manifest'))
+// });
+
+gulp.task('manifest', () => {
+  return gulp.src('app/manifest.json')
+    .pipe(gulp.dest('tmp'));
+});
+
+gulp.task('clean', () => {
   del(['tmp/*', 'dist/*']); // del files rather than dirs to avoid error
 });
 
