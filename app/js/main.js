@@ -72,11 +72,12 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
  * Initialize leaflet map, called from HTML.
  */
 initMap = () => {
-  self.newMap = L.map('map', {
-        center: [40.722216, -73.987501],
-        zoom: 12,
-        scrollWheelZoom: false
-      });
+  const mapJson = {
+    center: [40.722216, -73.987501],
+    zoom: 12,
+    scrollWheelZoom: false
+  }
+  self.newMap = L.map('map', mapJson);
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
     mapboxToken: 'pk.eyJ1IjoibWF0dDF3aWxsIiwiYSI6ImNqa3d4dWJhcDAybjkzcG9kdjBobDd3YXUifQ.3qsHPqRztxnk3L1sfwBp0Q',
     maxZoom: 18,

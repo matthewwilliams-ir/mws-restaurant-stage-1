@@ -1,4 +1,4 @@
-let idb = require('idb');
+import idb from 'idb';
 
 const staticCacheName = 'restaurant-info-v3';
 const urlsToCache = [
@@ -73,7 +73,7 @@ self.addEventListener('fetch', event => {
   if (requestUrl.port === '1337') {
     event.respondWith(idbResponse(event.request));
   } else {
-    event.respondWith(cachesResponse(event.request));
+    event.respondWith(cacheResponse(event.request));
   }
 });
 
