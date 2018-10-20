@@ -1,67 +1,84 @@
-var gulp = require('gulp');
-var del = require('del');
-var fs = require('fs');
-var replace = require('gulp-string-replace');
-var browserSync = require('browser-sync').create();
+const gulp = require('gulp');
+const minify = require('gulp-clean-css');
+const sourcemaps = require('gulp-sourcemaps');
+const uglify = require('gulp-uglify');
+const babel = require('gulp-babel');
+const autoprifixer = require('gulp-autoprefixer');
+const imagemin = require('gulp-imagemin');
+const browserify = require('browserify');
+const babelify = require('babelify');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
+const size = require('gulp-size');
 
-var paths = {
-  src: 'app/**/*',
-  srcHTML: 'app/**/*.html',
-  srcCSS: 'app/**/*.css',
-  srcJS: 'app/**/*.js',
-
-  tmp: 'tmp', // tmp folder
-  tmpIndex: 'tmp/index.html', // index.html in tmp folder
-  tmpCSS: 'tmp/**/*.css', // css files in tmp folder
-  tmpJS: 'tmp/**/*.js', // js files in tmp folder
-
-  dist: 'dist',
-  distIndex: 'dist/index.html',
-  distCSS: 'dist/**/*.css',
-  distJS: 'dist/**/*.js'
-};
-
-// build
-gulp.task('default', ['copy', 'js']);
-
-// serve & watch
-gulp.task('serve', function () {
-  browserSync.init({
-    server: paths.tmp,
-    port: 8000
-  });
-
-  gulp.watch(paths.srcJS, ['js-watch']);
+gulp.task('css', () => {
+    return gulp.src('app/css/**/*.css')
+    .pipe(sourcemaps.init())
+    .pipe(autoprifixer({
+        browsers: ['last 2 versions'],
+        cascade: false
+    }))
+    .pipe(minify())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest('dist/css'))
 });
 
-// build, serve, & watch
-gulp.task('serve:build', ['copy', 'js', 'serve']);
-
-// this task ensures the `js` task is complete before reloading browsers
-gulp.task('js-watch', ['js'], function (done) {
-  browserSync.reload();
-  done();
+gulp.task('js', () => {
+    gulp.src(['app/**/*.js', 'app/sw.js'])
+    .pipe(sourcemaps.init())
+    .pipe(babel({
+        presets: ['@babel/env']
+    }))
+    .pipe(uglify())
+    .pipe(sourcemaps.write())
+    .pipe(gulp.dest('dist'))
 });
 
-// Clean output directory
-gulp.task('clean', function () {
-  del(['tmp/*', 'dist/*']); // del files rather than dirs to avoid error
+gulp.task('html', () => {
+	return gulp.src('app/**/*.html')
+	.pipe(gulp.dest('dist'))
 });
 
-// HTML
-gulp.task('html', function () {
-  return gulp.src(paths.srcHTML)
-    .pipe(gulp.dest(paths.tmp));
-});
-// CSS
-gulp.task('css', function () {
-  return gulp.src(paths.srcCSS)
-    .pipe(gulp.dest(paths.tmp));
-});
-// JS
-gulp.task('js', function () {
-  return gulp.src(paths.srcJS)
-    .pipe(gulp.dest(paths.tmp));
+gulp.task('images', () => {
+	return gulp.src(['app/img/*.jpg'])
+	.pipe(imagemin())
+	.pipe(gulp.dest('dist/img'))
 });
 
-gulp.task('copy', ['html', 'css', 'js']);
+gulp.task('manifest', () => {
+	return gulp.src(['app/manifest/*'])
+	.pipe(gulp.dest('dist/manifest'))
+});
+
+gulp.task('sw', function () {
+  var bundler = browserify('./app/sw.js');
+
+  return bundler
+    .transform(babelify)
+    .bundle()
+    .pipe(source('sw.js'))
+    .pipe(buffer())
+    .pipe(uglify())
+    .pipe(size())
+    .pipe(gulp.dest("dist"));
+});
+
+// gulp.task('serve', function () {
+//   runSequence(['clean'], ['images', 'html', 'sw'], function() {
+//     browserSync.init({
+//       server: '.tmp',
+//       port: 8001
+//     });
+//
+//     gulp.watch(['app/*.html'], ['html', reload]);
+//     gulp.watch(['app/css/*.css'], ['html', reload]);
+//     gulp.watch(['app/js/*.js'], ['lint', 'html', reload]);
+//     gulp.watch(['app/sw.js'], ['lint', 'sw', reload]);
+//   });
+// });
+
+gulp.task('watch', () => {
+    gulp.watch(['app/*.html', 'app/**/*.js', 'app/sw.js', 'app/css/*.css', 'app/reviews.webmanifest'], ['default'])
+});
+
+gulp.task('default', ['js', 'css', 'html', 'manifest', 'images', 'watch']);

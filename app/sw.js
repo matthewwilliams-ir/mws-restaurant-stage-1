@@ -1,4 +1,4 @@
-import idb from 'idb';
+let idb = require('idb');
 
 const staticCacheName = 'restaurant-info-v3';
 const urlsToCache = [
@@ -30,7 +30,7 @@ const urlsToCache = [
   '/restaurant.html?id=9',
   '/restaurant.html?id=10',
   'css/styles.css',
-  'data/restaurants.json',
+  // 'data/restaurants.json',
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js',
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css'
 ];
