@@ -27,7 +27,7 @@ gulp
 ```
 This will only build and output the site to the `dist/` directory.
 
-#### clean
+#### Clean the output directory
 
 ```bash
 gulp clean
