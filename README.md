@@ -22,6 +22,8 @@ gulp serve
 
 This will build and output the site to the `dist/` directory and start the server at `http://localhost:8000`.
 
+Open `http://localhost:8000` in your browser.
+
 #### Only build
 
 ```bash
