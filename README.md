@@ -8,7 +8,7 @@ Stage 2 makes use of the gulp build system to build and serve the optimized site
 
 ## Instructions
 
-### 1. Local Development API
+### 1. Start the Local Development API Server
 
 Start the local development API server by cloning https://github.com/udacity/mws-restaurant-stage-2 and following the instructions in the README.
 
