@@ -12,41 +12,41 @@ const del = require('del');
 
 gulp.task('css', () => {
     return gulp.src('app/css/**/*.css')
-    .pipe(gulp.dest('tmp/css'))
+    .pipe(gulp.dest('dist/css'))
 });
 
 gulp.task('js', () => {
     return gulp.src(['app/**/*.js', 'reviews.webmanifest'])
-    .pipe(gulp.dest('tmp'))
+    .pipe(gulp.dest('dist'))
 });
 
-gulp.task('sw', function () {
-  var bundler = browserify('./app/sw.js'); // ['1.js', '2.js']
+gulp.task('sw', () => {
+  var bundler = browserify('./app/sw.js');
 
   return bundler
-    .transform(babelify)    // required for ES6 'import' syntax
-    .bundle()               // combine code
-    .pipe(source('sw.js'))  // get text stream; set destination filename
-    .pipe(buffer())         // required to use stream w/ other plugin
-    .pipe(uglify())         // condense & minify
-    .pipe(size())           // outputs file size to console
-    .pipe(gulp.dest("tmp"));
+    .transform(babelify)
+    .bundle()
+    .pipe(source('sw.js'))
+    .pipe(buffer())
+    .pipe(uglify())
+    .pipe(size())
+    .pipe(gulp.dest("dist"));
 });
 
 gulp.task('data', () => {
     return gulp.src('app/data/restaurants.json')
-    .pipe(gulp.dest('tmp/data'))
+    .pipe(gulp.dest('dist/data'))
 });
 
 gulp.task('html', () => {
 	return gulp.src('app/**/*.html')
-	.pipe(gulp.dest('tmp'))
+	.pipe(gulp.dest('dist'))
 });
 
 gulp.task('serve', ['clean', 'default'], () => {
-  return gulp.src("tmp")
+  return gulp.src("dist")
     .pipe(webserver({
-      port: 3000,
+      port: 8000,
       livereload: true
     }));
 });
@@ -54,17 +54,17 @@ gulp.task('serve', ['clean', 'default'], () => {
 gulp.task('images', ['icons'], () => {
 	return gulp.src(['app/img/*.jpg'])
 	.pipe(imagemin())
-	.pipe(gulp.dest('tmp/img'))
+	.pipe(gulp.dest('dist/img'))
 });
 
 gulp.task('icons', () => {
   return gulp.src('app/img/icons/**')
-    .pipe(gulp.dest('tmp/img/icons'))
+    .pipe(gulp.dest('dist/img/icons'))
 });
 
 gulp.task('manifest', () => {
   return gulp.src('app/manifest.json')
-    .pipe(gulp.dest('tmp'));
+    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('clean', () => {
