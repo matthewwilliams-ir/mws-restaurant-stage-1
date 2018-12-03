@@ -94,6 +94,36 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
 
+  const favButton = document.getElementById('restaurant-fav-button');
+  const addFavoriteLabel = `Mark ${restaurant.name} as favorite`;
+  const removeFavoriteLabel = `Unmark ${restaurant.name} as favorite`;
+
+  if (restaurant.is_favorite === 'true') {
+    favButton.classList.add('active');
+    favButton.setAttribute('aria-pressed', 'true');
+    favButton.innerHTML = removeFavoriteLabel;
+    favButton.title = removeFavoriteLabel;
+  } else {
+    favButton.setAttribute('aria-pressed', 'false');
+    favButton.innerHTML = addFavoriteLabel;
+    favButton.title = addFavoriteLabel;
+  }
+  favButton.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    if (favButton.classList.contains('active')) {
+      favButton.setAttribute('aria-pressed', 'false');
+      favButton.innerHTML = addFavoriteLabel;
+      favButton.title = addFavoriteLabel;
+      DBHelper.unMarkFavorite(restaurant.id);
+    } else {
+      favButton.setAttribute('aria-pressed', 'true');
+      favButton.innerHTML = removeFavoriteLabel;
+      favButton.title = removeFavoriteLabel;
+      DBHelper.markFavorite(restaurant.id);
+    }
+    favButton.classList.toggle('active');
+  });
+
   // fill operating hours
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();

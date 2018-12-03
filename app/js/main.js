@@ -159,6 +159,41 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
+  const favButton = document.createElement('button');
+  favButton.className = 'restaurant-fav-control';
+  favButton.setAttribute('aria-label', 'favorite');
+
+  const addFavoriteLabel = `Mark ${restaurant.name} as favorite`;
+  const removeFavoriteLabel = `Unmark ${restaurant.name} as favorite`;
+
+  if (restaurant.is_favorite === 'true') {
+    favButton.classList.add('active');
+    favButton.setAttribute('aria-pressed', 'true');
+    favButton.innerHTML = removeFavoriteLabel;
+    favButton.title = removeFavoriteLabel;
+  } else {
+    favButton.setAttribute('aria-pressed', 'false');
+    favButton.innerHTML = addFavoriteLabel;
+    favButton.title = addFavoriteLabel;
+  }
+
+  favButton.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    if (favButton.classList.contains('active')) {
+      favButton.setAttribute('aria-pressed', 'false');
+      favButton.innerHTML = addFavoriteLabel;
+      favButton.title = addFavoriteLabel;
+      DBHelper.unMarkFavorite(restaurant.id);
+    } else {
+      favButton.setAttribute('aria-pressed', 'true');
+      favButton.innerHTML = removeFavoriteLabel;
+      favButton.title = removeFavoriteLabel;
+      DBHelper.markFavorite(restaurant.id);
+    }
+    favButton.classList.toggle('active');
+  });
+  li.append(favButton);
+
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);

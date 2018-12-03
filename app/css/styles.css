@@ -215,6 +215,61 @@ nav h1 a {
   text-transform: uppercase;
 }
 
+#restaurants-list .restaurant-fav-control {
+	background-color: transparent;
+  width: 44px;
+  height: 44px;
+  position: absolute;
+  align-self: flex-end;
+  margin-top: 6px;
+  margin-left: -6px;
+  padding: 5px;
+  border: none;
+  background-image: url('../img/icons/baseline_favorite_border_white_18dp.png');
+	background-repeat: no-repeat;
+  background-position: 8px 8px;
+  background-size: 24px;
+  cursor: pointer;
+	text-indent: -10000px;
+}
+#restaurants-list .restaurant-fav-control.active  {
+  background-image: url('../img/icons/baseline_favorite_white_18dp.png');
+}
+#restaurants-list .restaurant-fav-control:hover {
+  background-image: url('../img/icons/baseline_favorite_white_18dp.png');
+}
+
+#restaurant-img-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#restaurant-fav-button {
+  background-color: transparent;
+  width: 44px;
+  height: 44px;
+  position: absolute;
+  align-self: flex-end;
+  margin-top: 6px;
+  margin-left: -6px;
+  padding: 5px;
+  border: none;
+  background-image: url('../img/icons/baseline_favorite_border_white_18dp.png');
+	background-repeat: no-repeat;
+  background-position: 8px 8px;
+  background-size: 24px;
+  cursor: pointer;
+	text-indent: -10000px;
+}
+
+#restaurant-fav-button.active {
+  background-image: url('../img/icons/baseline_favorite_white_18dp.png');
+}
+
+#restaurant-fav-button:hover {
+  background-image: url('../img/icons/baseline_favorite_white_18dp.png');
+}
+
 /* ====================== Restaurant Details ====================== */
 .inside header {
   width: 100%;

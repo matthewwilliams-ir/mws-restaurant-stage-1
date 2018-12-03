@@ -9,14 +9,14 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}`;
   }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    fetch(DBHelper.DATABASE_URL)
+    fetch(`${DBHelper.DATABASE_URL}/restaurants`)
       .then(response => {
         if (!response.ok) {
           throw Error(`Request failed. Returned status of ${response.statusText}`);
@@ -166,6 +166,28 @@ class DBHelper {
       })
       marker.addTo(newMap);
     return marker;
+  }
+
+  /**
+   * Mark restaurant as favorite
+   */
+  static markFavorite(id) {
+    fetch(`${DBHelper.DATABASE_URL}/restaurants/${id}/?is_favorite=true`, {
+      method: 'PUT'
+    })
+    .then(response => console.log(response))
+    .catch(err => console.log(err));
+  }
+
+  /**
+   * Unmark restaurant as favorite
+   */
+  static unMarkFavorite(id) {
+    fetch(`${DBHelper.DATABASE_URL}/restaurants/${id}/?is_favorite=false`, {
+      method: 'PUT'
+    })
+    .then(response => console.log(response))
+    .catch(err => console.log(err));
   }
 
 }
