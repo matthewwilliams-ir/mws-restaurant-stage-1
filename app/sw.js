@@ -1,6 +1,6 @@
 import idb from 'idb';
 
-const staticCacheName = 'restaurant-info-v3';
+const staticCacheName = 'restaurant-info-v6';
 const urlsToCache = [
   '/',
   'index.html',
@@ -42,17 +42,27 @@ const dbPromise = idb.open("restaurant-db", 1, upgradeDB => {
   }
 });
 
-const idbKeyval = {
-  get(key) {
+const idbKeyVal = {
+  get(store, key) {
     return dbPromise.then(db => {
-      return db.transaction('restaurants')
-        .objectStore('restaurants').get(key);
+      return db
+        .transaction(store)
+        .objectStore(store)
+        .get(key);
     });
   },
-  set(key, val) {
+  getAll(store) {
     return dbPromise.then(db => {
-      const tx = db.transaction('restaurants', 'readwrite');
-      tx.objectStore('restaurants').put(val, key);
+      return db
+        .transaction(store)
+        .objectStore(store)
+        .getAll();
+    });
+  },
+  set(store, val) {
+    return dbPromise.then(db => {
+      const tx = db.transaction(store, 'readwrite');
+      tx.objectStore(store).put(val);
       return tx.complete;
     });
   }
@@ -71,7 +81,7 @@ self.addEventListener('fetch', event => {
   var requestUrl = new URL(event.request.url);
 
   if (requestUrl.port === '1337') {
-    event.respondWith(idbResponse(event.request));
+    event.respondWith(idbRestaurantResponse(event.request));
   } else {
     event.respondWith(cacheResponse(event.request));
   }
@@ -85,23 +95,53 @@ function cacheResponse(request) {
   }).catch(error => new Response(error));
 }
 
-function idbResponse(request) {
-  return idbKeyval.get("restaurants").then(restaurants => {
-    return (restaurants || fetch(request)
-      .then(response => response.json())
-      .then(json => {
-        idbKeyval.set("restaurants", json);
-        return json;
-      })
-    );
-  })
-  .then(response => new Response(JSON.stringify(response)))
-  .catch(error => {
-    return new Response(error, {
-      status: 400,
-      statusText: 'Error fetching data from IDB.'
+// function idbResponse(request) {
+//   return idbKeyval.get("restaurants").then(restaurants => {
+//     return (restaurants || fetch(request)
+//       .then(response => response.json())
+//       .then(json => {
+//         idbKeyval.set("restaurants", json);
+//         return json;
+//       })
+//     );
+//   })
+//   .then(response => new Response(JSON.stringify(response)))
+//   .catch(error => {
+//     return new Response(error, {
+//       status: 400,
+//       statusText: 'Error fetching data from IDB.'
+//     });
+//   });
+// }
+
+let j = 0;
+function idbRestaurantResponse(request, id) {
+  // 1. getAll records from objectStore
+  // 2. if more than 1 rec then return match
+  // 3. if no match then fetch json, write to idb, & return response
+
+  return idbKeyVal.getAll('restaurants')
+    .then(restaurants => {
+      if (restaurants.length) {
+        return restaurants;
+      }
+      return fetch(request)
+        .then(response => response.json())
+        .then(json => {
+          json.forEach(restaurant => {  // <- this line loops thru the json
+            console.log('fetch idb write', ++j, restaurant.id, restaurant.name);
+            idbKeyVal.set('restaurants', restaurant); // <- writes each record
+          });
+          return json;
+        });
+    })
+    .then(response => new Response(JSON.stringify(response)))
+    .catch(error => {
+      return new Response(error, {
+        status: 404,
+        statusText: 'my bad request'
+      });
     });
-  });
 }
 
 self.addEventListener('message', event => {
@@ -111,7 +151,7 @@ self.addEventListener('message', event => {
 });
 
 self.addEventListener('activate', event => {
-  var cacheWhitelist = ['restaurant-info-v3'];
+  var cacheWhitelist = [staticCacheName];
 
   event.waitUntil(
     caches.keys().then(cacheNames => {
