@@ -136,6 +136,13 @@ class DBHelper {
     });
   }
 
+  static fetchReviewsById(id, callback) {
+    fetch(DBHelper.DATABASE_URL + `/reviews/?restaurant_id=${id}`)
+      .then(response => response.json())
+      .then(json => callback(null, json))
+      .catch(error => callback(error, null));
+  }
+
   /**
    * Restaurant page URL.
    */
