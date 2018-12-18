@@ -197,4 +197,21 @@ class DBHelper {
     .catch(err => console.log(err));
   }
 
+  static createRestaurantReview(id, name, rating, comments, callback) {
+    const data = {
+      'restaurant_id': id,
+      'name': name,
+      'rating': rating,
+      'comments': comments
+    };
+    fetch(DBHelper.DATABASE_URL + '/reviews/', {
+      headers: { 'Content-Type': 'application/form-data' },
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(data => callback(null, data))
+      .catch(err => callback(err, null));
+  }
+
 }
