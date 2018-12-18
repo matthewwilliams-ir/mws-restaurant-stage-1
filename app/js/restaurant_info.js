@@ -158,6 +158,19 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 fillReviewsHTML = (error, reviews) => {
   self.restaurant.reviews = reviews;
 
+  const reviewsHeader = document.getElementById('reviews-header');
+
+  const reviewsTitle = document.createElement('h2');
+  reviewsTitle.innerHTML = 'Reviews';
+  reviewsHeader.appendChild(reviewsTitle);
+
+  const addReview = document.createElement('button');
+  addReview.classList.add('review-add-btn');
+  addReview.setAttribute('aria-label', 'add review');
+  addReview.title = 'Add Review';
+  addReview.addEventListener('click', openModal);
+  reviewsHeader.appendChild(addReview);
+
   const container = document.getElementById('reviews-container');
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -170,20 +183,6 @@ fillReviewsHTML = (error, reviews) => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
-
-  const reviewsHeader = document.getElementById('reviews-header');
-
-  const reviewsTitle = document.createElement('h2');
-  reviewsTitle.innerHTML = 'Reviews';
-  reviewsHeader.appendChild(reviewsTitle);
-
-  const addReview = document.createElement('button');
-  addReview.classList.add('review-add-btn');
-  addReview.setAttribute('aria-label', 'Add Review');
-  addReview.title = 'Add Review';
-  addReview.addEventListener('click', openModal);
-  reviewsHeader.appendChild(addReview);
-
 }
 
 /**
