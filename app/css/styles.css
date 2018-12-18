@@ -221,8 +221,8 @@ nav h1 a {
   height: 44px;
   position: absolute;
   align-self: flex-end;
-  margin-top: 6px;
-  margin-left: -6px;
+  margin-top: 0px;
+  margin-left: 0px;
   padding: 5px;
   border: none;
   background-image: url('../img/icons/baseline_favorite_border_white_18dp.png');
@@ -251,7 +251,7 @@ nav h1 a {
   position: absolute;
   align-self: flex-end;
   margin-top: 6px;
-  margin-left: -6px;
+  margin-left: 0px;
   padding: 5px;
   border: none;
   background-image: url('../img/icons/baseline_favorite_border_white_18dp.png');
@@ -366,6 +366,63 @@ nav h1 a {
 
 #reviews-list li p {
   margin: 0 0 10px;
+}
+
+#reviews-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+#reviews-container .review-add-btn {
+	background-color: transparent;
+  width: 44px;
+  height: 44px;
+	padding: 5px;
+  border: none;
+  background-image: url('../img/icons/baseline_create_black_18dp.png');
+	background-repeat: no-repeat;
+  background-position: 8px 8px;
+  background-size: 24px;
+  cursor: pointer;
+}
+
+#modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -10;
+  display: flex;
+  flex-direction: column;
+  width: 80vw;
+  height: 80vh;
+  border: 1px solid #666;
+  border-radius: 10px;
+  opacity: 0;
+  transition: all .3s;
+  overflow: hidden;
+  background-color: #eee;
+}
+
+#modal.show {
+  opacity: 1;
+  z-index: 10;
+}
+
+#modal .close-btn {
+  align-self: flex-end;
+  font-size: 1.6em;
+  margin: 8px;
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+#review-form {
+  width: 100%;
+  padding: 20px 26px;
+  color: #333;
+  overflow-y: auto;
 }
 
 #restaurant-hours {

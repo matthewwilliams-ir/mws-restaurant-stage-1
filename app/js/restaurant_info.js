@@ -1,6 +1,12 @@
 let restaurant;
 var newMap;
 
+const toggleModal = (evt) => {
+  evt.preventDefault();
+  const modal = document.getElementById('modal');
+  modal.classList.toggle('show');
+};
+
 /**
  * Initialize map as soon as the page is loaded.
  */
@@ -159,10 +165,6 @@ fillReviewsHTML = (error, reviews) => {
   self.restaurant.reviews = reviews;
 
   const container = document.getElementById('reviews-container');
-  const title = document.createElement('h3');
-  title.innerHTML = 'Reviews';
-  container.appendChild(title);
-
   if (!reviews) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
@@ -174,6 +176,20 @@ fillReviewsHTML = (error, reviews) => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
+
+  const reviewsHeader = document.getElementById('reviews-header');
+
+  const reviewsTitle = document.createElement('h2');
+  reviewsTitle.innerHTML = 'Reviews';
+  reviewsHeader.appendChild(reviewsTitle);
+
+  const addReview = document.createElement('button');
+  addReview.classList.add('review-add-btn');
+  addReview.setAttribute('aria-label', 'Add Review');
+  addReview.title = 'Add Review';
+  addReview.addEventListener('click', toggleModal);
+  reviewsHeader.appendChild(addReview);
+
 }
 
 /**
@@ -182,7 +198,7 @@ fillReviewsHTML = (error, reviews) => {
 createReviewHTML = (review) => {
   const li = document.createElement('li');
 
-  const name = document.createElement('h2');
+  const name = document.createElement('h3');
   name.innerHTML = review.name;
   li.appendChild(name);
 
