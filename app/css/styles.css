@@ -489,7 +489,6 @@ button#submit-review-btn {
 }
 
 #review-form-container {
-  width: 100%;
   padding: 0 20px 26px;
   color: #333;
   overflow-y: auto;
@@ -500,8 +499,6 @@ button#submit-review-btn {
 }
 
 #review-form {
-  display: flex;
-  flex-direction: column;
   background: #fff;
   border: 1px solid #e5e5e5;
   border-radius: 4px;
@@ -586,7 +583,6 @@ button#submit-review-btn {
 }
 
 #review-form {
-  width: 100%;
   padding: 20px 26px;
   color: #333;
   overflow-y: auto;
