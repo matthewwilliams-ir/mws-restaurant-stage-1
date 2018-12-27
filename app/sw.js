@@ -35,11 +35,15 @@ const urlsToCache = [
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css'
 ];
 
-const dbPromise = idb.open("restaurant-db", 1, upgradeDB => {
+const dbPromise = idb.open("restaurant-db", 2, upgradeDB => {
   switch (upgradeDB.oldVersion) {
     case 0:
       upgradeDB.createObjectStore('restaurants',
         { keyPath: 'id', unique: true });
+    case 1:
+      const reviewStore = upgradeDB.createObjectStore('reviews',
+        { autoIncrement: true });
+      reviewStore.createIndex('restaurant_id', 'restaurant_id');
   }
 });
 
@@ -60,6 +64,15 @@ const idbKeyVal = {
         .getAll();
     });
   },
+  getAllIdx(store, idx, key) {
+    return dbPromise.then(db => {
+      return db
+        .transaction(store)
+        .objectStore(store)
+        .index(idx)
+        .getAll(key);
+    });
+  },
   set(store, val) {
     return dbPromise.then(db => {
       const tx = db.transaction(store, 'readwrite');
@@ -78,13 +91,18 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-
-  var requestUrl = new URL(event.request.url);
+  const request = event.request;
+  const requestUrl = new URL(request.url);
 
   if (requestUrl.port === '1337') {
-    event.respondWith(idbRestaurantResponse(event.request));
+    if (request.url.includes('reviews')) {
+      let id = +requestUrl.searchParams.get('restaurant_id');
+      event.respondWith(idbReviewResponse(request, id));
+    } else {
+      event.respondWith(idbRestaurantResponse(request));
+    }
   } else {
-    event.respondWith(cacheResponse(event.request));
+    event.respondWith(cacheResponse(request));
   }
 });
 
@@ -96,31 +114,9 @@ function cacheResponse(request) {
   }).catch(error => new Response(error));
 }
 
-// function idbResponse(request) {
-//   return idbKeyval.get("restaurants").then(restaurants => {
-//     return (restaurants || fetch(request)
-//       .then(response => response.json())
-//       .then(json => {
-//         idbKeyval.set("restaurants", json);
-//         return json;
-//       })
-//     );
-//   })
-//   .then(response => new Response(JSON.stringify(response)))
-//   .catch(error => {
-//     return new Response(error, {
-//       status: 400,
-//       statusText: 'Error fetching data from IDB.'
-//     });
-//   });
-// }
-
 let j = 0;
 function idbRestaurantResponse(request, id) {
-  // 1. getAll records from objectStore
-  // 2. if more than 1 rec then return match
-  // 3. if no match then fetch json, write to idb, & return response
-
+  
   return idbKeyVal.getAll('restaurants')
     .then(restaurants => {
       if (restaurants.length) {
@@ -132,6 +128,32 @@ function idbRestaurantResponse(request, id) {
           json.forEach(restaurant => {  // <- this line loops thru the json
             console.log('fetch idb write', ++j, restaurant.id, restaurant.name);
             idbKeyVal.set('restaurants', restaurant); // <- writes each record
+          });
+          return json;
+        });
+    })
+    .then(response => new Response(JSON.stringify(response)))
+    .catch(error => {
+      return new Response(error, {
+        status: 404,
+        statusText: 'my bad request'
+      });
+    });
+}
+
+let k = 0;
+function idbReviewResponse(request, id) {
+  return idbKeyVal.getAllIdx('reviews', 'restaurant_id', id)
+    .then(reviews => {
+      if (reviews.length) {
+        return reviews;
+      }
+      return fetch(request)
+        .then(response => response.json())
+        .then(json => {
+          json.forEach(review => {
+            console.log('fetch idb review write', ++k, review.id, review.name);
+            idbKeyVal.set('reviews', review);
           });
           return json;
         });
