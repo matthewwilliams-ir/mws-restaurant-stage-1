@@ -35,7 +35,7 @@ const urlsToCache = [
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css'
 ];
 
-const dbPromise = idb.open("restaurant-db", 2, upgradeDB => {
+const dbPromise = idb.open("restaurant-db", 3, upgradeDB => {
   switch (upgradeDB.oldVersion) {
     case 0:
       upgradeDB.createObjectStore('restaurants',
@@ -44,6 +44,9 @@ const dbPromise = idb.open("restaurant-db", 2, upgradeDB => {
       const reviewStore = upgradeDB.createObjectStore('reviews',
         { autoIncrement: true });
       reviewStore.createIndex('restaurant_id', 'restaurant_id');
+    case 2:
+    upgradeDB.createObjectStore('offline',
+      { autoIncrement: true });
   }
 });
 
@@ -78,6 +81,16 @@ const idbKeyVal = {
       const tx = db.transaction(store, 'readwrite');
       tx.objectStore(store).put(val);
       return tx.complete;
+    });
+  },
+  setReturnId(store, val) {
+    return dbPromise.then(db => {
+      const tx = db.transaction(store, 'readwrite');
+      const pk = tx
+        .objectStore(store)
+        .put(val);
+      tx.complete;
+      return pk;
     });
   }
 };
@@ -116,7 +129,7 @@ function cacheResponse(request) {
 
 let j = 0;
 function idbRestaurantResponse(request, id) {
-  
+
   return idbKeyVal.getAll('restaurants')
     .then(restaurants => {
       if (restaurants.length) {

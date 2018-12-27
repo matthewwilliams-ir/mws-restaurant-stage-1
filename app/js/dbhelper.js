@@ -197,21 +197,55 @@ class DBHelper {
     .catch(err => console.log(err));
   }
 
-  static createRestaurantReview(id, name, rating, comments, callback) {
+  static createRestaurantReview(restaurant_id, name, rating, comments, callback) {
     const data = {
-      'restaurant_id': id,
-      'name': name,
-      'rating': rating,
-      'comments': comments
+      restaurant_id: restaurant_id,
+      name: name,
+      rating: +rating,
+      comments: comments
     };
+    const body = JSON.stringify(data);
+
     fetch(DBHelper.DATABASE_URL + '/reviews/', {
       headers: { 'Content-Type': 'application/form-data' },
       method: 'POST',
-      body: JSON.stringify(data)
+      body: body
     })
-      .then(response => response.json())
-      .then(data => callback(null, data))
-      .catch(err => callback(err, null));
+    .then(response => response.json())
+    .then(data => callback(null, data))
+    .catch(err => {
+      // Offline create review
+      DBHelper.createIDBReview(data)
+        .then(reviewKey => {
+          console.log('returned reviewKey', reviewKey);
+          DBHelper.addRequestToQueue(url, headers, method, data, reviewKey)
+            .then(offlineKey => console.log('offlineKey', offlineKey));
+        });
+      callback(err, null);
+    });
+  }
+
+  static createIDBReview(review) {
+    return idbKeyVal.setReturnId('reviews', review)
+      .then(id => {
+        console.log('Saved to IDB: reviews', review);
+        return id;
+      });
+  }
+
+  static addRequestToQueue(url, headers, method, data, review_key) {
+    const request = {
+      url: url,
+      headers: headers,
+      method: method,
+      data: data,
+      review_key: review_key
+    };
+    return idbKeyVal.setReturnId('offline', request)
+      .then(id => {
+        console.log('Saved to IDB: offline', request);
+        return id;
+      });
   }
 
 }
