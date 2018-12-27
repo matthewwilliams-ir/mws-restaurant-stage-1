@@ -21,16 +21,31 @@ gulp.task('js', () => {
 });
 
 gulp.task('sw', () => {
-  var bundler = browserify('./app/sw.js');
+  var bundler = browserify(['./app/sw.js', './app/js/idbhelper.js'],
+    { debug: false });
 
   return bundler
-    .transform(babelify)
+    .transform(babelify, {sourceMaps: false})
     .bundle()
     .pipe(source('sw.js'))
     .pipe(buffer())
     .pipe(uglify())
     .pipe(size())
     .pipe(gulp.dest("dist"));
+});
+
+gulp.task('dbhelper', function () {
+  var bundler = browserify([
+    './app/js/idbhelper.js',
+    './app/js/dbhelper.js'
+  ], { debug: false });
+
+  return bundler
+    .transform(babelify, {sourceMaps: false})
+    .bundle()
+    .pipe(source('dbhelper.min.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest('dist/js'));
 });
 
 gulp.task('data', () => {
@@ -71,4 +86,4 @@ gulp.task('clean', () => {
   del(['tmp/*', 'dist/*']);
 });
 
-gulp.task('default', ['js', 'sw', 'css', 'html', 'manifest', 'images']);
+gulp.task('default', ['js', 'sw', 'dbhelper', 'css', 'html', 'manifest', 'images']);
