@@ -38,7 +38,8 @@ const urlsToCache = [
 const dbPromise = idb.open("restaurant-db", 1, upgradeDB => {
   switch (upgradeDB.oldVersion) {
     case 0:
-      upgradeDB.createObjectStore('restaurants');
+      upgradeDB.createObjectStore('restaurants',
+        { keyPath: 'id', unique: true });
   }
 });
 
