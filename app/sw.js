@@ -46,6 +46,11 @@ self.addEventListener('fetch', event => {
   const requestUrl = new URL(request.url);
 
   if (requestUrl.port === '1337') {
+    // Only intercept GET requests
+    if (event.request.method !== 'GET') {
+      return;
+    }
+
     if (request.url.includes('reviews')) {
       let id = +requestUrl.searchParams.get('restaurant_id');
       event.respondWith(idbReviewResponse(request, id));
