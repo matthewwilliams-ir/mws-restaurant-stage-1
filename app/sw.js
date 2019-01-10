@@ -1,5 +1,3 @@
-import idb from 'idb';
-
 const staticCacheName = 'restaurant-info-v6';
 const urlsToCache = [
   '/',
@@ -35,53 +33,6 @@ const urlsToCache = [
   'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css'
 ];
 
-const dbPromise = idb.open("restaurant-db", 2, upgradeDB => {
-  switch (upgradeDB.oldVersion) {
-    case 0:
-      upgradeDB.createObjectStore('restaurants',
-        { keyPath: 'id', unique: true });
-    case 1:
-      const reviewStore = upgradeDB.createObjectStore('reviews',
-        { autoIncrement: true });
-      reviewStore.createIndex('restaurant_id', 'restaurant_id');
-  }
-});
-
-const idbKeyVal = {
-  get(store, key) {
-    return dbPromise.then(db => {
-      return db
-        .transaction(store)
-        .objectStore(store)
-        .get(key);
-    });
-  },
-  getAll(store) {
-    return dbPromise.then(db => {
-      return db
-        .transaction(store)
-        .objectStore(store)
-        .getAll();
-    });
-  },
-  getAllIdx(store, idx, key) {
-    return dbPromise.then(db => {
-      return db
-        .transaction(store)
-        .objectStore(store)
-        .index(idx)
-        .getAll(key);
-    });
-  },
-  set(store, val) {
-    return dbPromise.then(db => {
-      const tx = db.transaction(store, 'readwrite');
-      tx.objectStore(store).put(val);
-      return tx.complete;
-    });
-  }
-};
-
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(staticCacheName).then(cache => {
@@ -95,6 +46,11 @@ self.addEventListener('fetch', event => {
   const requestUrl = new URL(request.url);
 
   if (requestUrl.port === '1337') {
+    // Only intercept GET requests
+    if (event.request.method !== 'GET') {
+      return;
+    }
+
     if (request.url.includes('reviews')) {
       let id = +requestUrl.searchParams.get('restaurant_id');
       event.respondWith(idbReviewResponse(request, id));
@@ -116,7 +72,7 @@ function cacheResponse(request) {
 
 let j = 0;
 function idbRestaurantResponse(request, id) {
-  
+
   return idbKeyVal.getAll('restaurants')
     .then(restaurants => {
       if (restaurants.length) {

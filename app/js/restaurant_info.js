@@ -8,6 +8,31 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
 });
 
+window.addEventListener('load', function () {
+  const isOffline = getParameterByName('isOffline');
+
+  if (isOffline) {
+    document.querySelector('#offline').setAttribute('aria-hidden', false);
+    document.querySelector('#offline').setAttribute('aria-live', 'assertive');
+    document.querySelector('#offline').classList.add('show');
+
+    wait(8000).then(() => {
+      document.querySelector('#offline').setAttribute('aria-hidden', true);
+      document.querySelector('#offline').setAttribute('aria-live', 'off');
+      document.querySelector('#offline').classList.remove('show');
+    });
+  }
+
+  function wait(ms) {
+    return new Promise(function (resolve, reject) {
+      window.setTimeout(function () {
+        resolve(ms);
+        reject(ms);
+      }, ms);
+    });
+  }
+});
+
 /**
  * Initialize leaflet map
  */
@@ -316,26 +341,31 @@ const openModal = () => {
 
 const saveAddReview = (e) => {
   e.preventDefault();
+  const form = e.target;
 
-  const name = document.querySelector('#reviewName').value;
-  const rating = document.querySelector('input[name=rate]:checked').value;
-  const comments = document.querySelector('#reviewComments').value;
+  if (form.checkValidity()) {
+    console.log('is valid');
 
-  // console.log(name);
-  // console.log(rating);
-  // console.log(comments);
+    const restaurantId = self.restaurant.id;
+    const name = document.querySelector('#reviewName').value;
+    const rating = document.querySelector('input[name=rate]:checked').value;
+    const comments = document.querySelector('#reviewComments').value;
 
-  DBHelper.createRestaurantReview(self.restaurant.id, name, rating, comments,
-    (error, review) => {
-    console.log('got callback');
-    if (error) {
-      console.log('Error saving review');
-    } else {
-      // do some other stuff
-      console.log(review);
-      window.location.href = `/restaurant.html?id=${self.restaurant.id}`;
-    }
-  });
+    DBHelper.createRestaurantReview(restaurantId, name, rating, comments,
+      (error, review) => {
+      console.log('got callback');
+      form.reset();
+      if (error) {
+        console.log('We are offline. Review has been saved to the queue.');
+        window.location.href =
+          `/restaurant.html?id=${self.restaurant.id}&isOffline=true`;
+      } else {
+        console.log('Received updated record from DB Server', review);
+        DBHelper.createIDBReview(review);
+        window.location.href = `/restaurant.html?id=${self.restaurant.id}`;
+      }
+    });
+  }
 };
 
 const closeModal = () => {

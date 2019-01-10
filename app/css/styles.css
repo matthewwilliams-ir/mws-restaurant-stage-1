@@ -597,6 +597,32 @@ button#submit-review-btn {
   color: #666;
 }
 
+#offline {
+  position: fixed;
+  align-self: center;
+  justify-self: center;
+  top: -120px;
+  background-color: #f3df84;
+  border-bottom: 1px solid #999;
+  border-left: 1px solid #999;
+  border-right: 1px solid #999;
+  padding: 10px 16px;
+  margin: 0 auto;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  max-width: 400px;
+  transition: top .3s ease-in-out 1s;
+}
+#offline.show {
+  top: 0;
+}
+#offline h3 {
+  margin: 0 0 6px;
+}
+#offline p {
+  margin: 0 0 10px;
+}
+
 @media screen and (max-width: 450px) {
 
 	nav h1 a {
