@@ -87,3 +87,33 @@ const showOffline = () => {
 };
 
 self.showOffline = showOffline;
+
+const favoriteClickHandler = (evt, fav, restaurant) => {
+  evt.preventDefault();
+  console.log(`Is favourite: ${restaurant.is_favorite}`);
+  const is_favorite = JSON.parse(restaurant.is_favorite); // set to boolean
+
+  DBHelper.toggleFavorite(restaurant, (error, restaurant) => {
+    console.log('got callback');
+    if (error) {
+      console.log('We are offline. Review has been saved to the queue.');
+      showOffline();
+    } else {
+      console.log('Received updated record from DB Server', restaurant);
+      DBHelper.updateIDBRestaurant(restaurant); // write record to IDB store
+    }
+  });
+
+  // set ARIA, text, & labels
+  if (is_favorite) {
+    fav.setAttribute('aria-pressed', 'false');
+    fav.innerHTML = `Add ${restaurant.name} as a favorite`;
+    fav.title = `Add ${restaurant.name} as a favorite`;
+  } else {
+    fav.setAttribute('aria-pressed', 'true');
+    fav.innerHTML = `Remove ${restaurant.name} as a favorite`;
+    fav.title = `Remove ${restaurant.name} as a favorite`;
+  }
+  fav.classList.toggle('active');
+};
+self.favoriteClickHandler = favoriteClickHandler;

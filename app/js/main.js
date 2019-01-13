@@ -170,7 +170,7 @@ createRestaurantHTML = (restaurant) => {
   const addFavoriteLabel = `Mark ${restaurant.name} as favorite`;
   const removeFavoriteLabel = `Unmark ${restaurant.name} as favorite`;
 
-  if (restaurant.is_favorite === 'true') {
+  if ((/true/i).test(restaurant.is_favorite)) {
     favButton.classList.add('active');
     favButton.setAttribute('aria-pressed', 'true');
     favButton.innerHTML = removeFavoriteLabel;
@@ -181,21 +181,9 @@ createRestaurantHTML = (restaurant) => {
     favButton.title = addFavoriteLabel;
   }
 
-  favButton.addEventListener('click', (evt) => {
-    evt.preventDefault();
-    if (favButton.classList.contains('active')) {
-      favButton.setAttribute('aria-pressed', 'false');
-      favButton.innerHTML = addFavoriteLabel;
-      favButton.title = addFavoriteLabel;
-      DBHelper.unMarkFavorite(restaurant.id);
-    } else {
-      favButton.setAttribute('aria-pressed', 'true');
-      favButton.innerHTML = removeFavoriteLabel;
-      favButton.title = removeFavoriteLabel;
-      DBHelper.markFavorite(restaurant.id);
-    }
-    favButton.classList.toggle('active');
-  });
+  favButton.addEventListener('click', (evt) => {          // <- new
+    favoriteClickHandler(evt, favButton, restaurant);     // <- new
+  }, false);
   li.append(favButton);
 
   const image = document.createElement('img');
