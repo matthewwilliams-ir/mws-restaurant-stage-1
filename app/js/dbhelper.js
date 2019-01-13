@@ -137,7 +137,7 @@ class DBHelper {
   }
 
   static fetchReviewsById(id, callback) {
-    fetch(DBHelper.DATABASE_URL + `/reviews/?restaurant_id=${id}`)
+    fetch(`${DBHelper.DATABASE_URL}/reviews/?restaurant_id=${id}`)
       .then(response => response.json())
       .then(json => callback(null, json))
       .catch(error => callback(error, null));
@@ -198,7 +198,7 @@ class DBHelper {
   }
 
   static createRestaurantReview(restaurant_id, name, rating, comments, callback) {
-    const url = DBHelper.DATABASE_URL + '/reviews/';
+    const url = `${DBHelper.DATABASE_URL}/reviews/`;
     const headers = { 'Content-Type': 'application/form-data' };
     const method = 'POST';
     const data = {
@@ -217,12 +217,12 @@ class DBHelper {
     .then(response => response.json())
     .then(data => callback(null, data))
     .catch(err => {
-      // Offline create review
+      // Create Review Offline
       DBHelper.createIDBReview(data)
         .then(reviewKey => {
-          console.log('returned reviewKey', reviewKey);
+          console.log('Offline Review Returned. Review Key: ', reviewKey);
           DBHelper.addRequestToQueue(url, headers, method, data, reviewKey)
-            .then(offlineKey => console.log('offlineKey', offlineKey));
+            .then(offlineKey => console.log('Offline Key: ', offlineKey));
         });
       callback(err, null);
     });
@@ -261,10 +261,10 @@ class DBHelper {
     })
       .then(function nextRequest (cursor) {
         if (!cursor) {
-          console.log('cursor done.');
+          console.log('End of queue.');
           return;
         }
-        console.log('cursor', cursor.value.data.name, cursor.value.data);
+        console.log('Queue item:', cursor.value.data.name, cursor.value.data);
 
         const offline_key = cursor.key;
         const url = cursor.value.url;
@@ -274,7 +274,7 @@ class DBHelper {
         const review_key = cursor.value.review_key;
         const body = JSON.stringify(data);
 
-        // update server with HTTP POST request & get updated record back
+        // Update server with HTTP POST request & get updated record back
         fetch(url, {
           headers: headers,
           method: method,
@@ -282,51 +282,51 @@ class DBHelper {
         })
           .then(response => response.json())
           .then(data => {
-            // data is returned record
-            console.log('Received updated record from DB Server', data);
-            // test if this is a review or favorite update
+            console.log('Received Updated record from DB Server', data);
 
-            // 1. Delete http request record from offline store
+            // Delete record from offline store
             dbPromise.then(db => {
               const tx = db.transaction(['offline'], 'readwrite');
               tx.objectStore('offline').delete(offline_key);
               return tx.complete;
             })
               .then(() => {
-                // test if this is a review or favorite update
+                // Process offline record
                 if (review_key === undefined) {
-                  console.log('Favorite posted to server.');
+                  // Favorite
+                  console.log('Favorite Posted to Server.');
                 } else {
-                  // 2. Add new review record to reviews store
-                  // 3. Delete old review record from reviews store
+                  // Review
+                  // Update Review record in reviews store
                   dbPromise.then(db => {
                     const tx = db.transaction(['reviews'], 'readwrite');
                     return tx.objectStore('reviews').put(data)
                       .then(() => tx.objectStore('reviews').delete(review_key))
                       .then(() => {
-                        console.log('tx complete reached.');
+                        console.log('Transaction Complete.');
+                        console.log('Review record updated in reviews store');
                         return tx.complete;
                       })
                       .catch(err => {
                         tx.abort();
-                        console.log('transaction error: tx aborted', err);
+                        console.log('Transaction failed and aborted.', err);
                       });
                   })
-                    .then(() => console.log('review transaction success!'))
-                    .catch(err => console.log('reviews store error', err));
+                    .then(() => console.log('Review Transaction Successful.'))
+                    .catch(err => console.log('Reviews store error', err));
                 }
               })
-              .then(() => console.log('offline rec delete success!'))
-              .catch(err => console.log('offline store error', err));
+              .then(() => console.log('Offline record successfully deleted'))
+              .catch(err => console.log('Offline store error', err));
           }).catch(err => {
-            console.log('fetch error. we are offline.');
+            console.log('Fetch error. We are offline.');
             console.log(err);
             return;
           });
         return cursor.continue().then(nextRequest);
       })
-      .then(() => console.log('Done cursoring'))
-      .catch(err => console.log('Error opening cursor', err));
+      .then(() => console.log('Queue processing complete.'))
+      .catch(err => console.log('Error processing queue', err));
   }
 
   static toggleFavorite(restaurant, callback) {
@@ -348,11 +348,11 @@ class DBHelper {
         // Update restaurant record in local IDB
         DBHelper.updateIDBRestaurant(restaurant)
           .then(() => {
-            // add to queue...
+            // Add offline request to queue
             console.log('Add favorite request to queue');
             console.log(`DBHelper.addRequestToQueue(${url}, {}, ${method}, '')`);
             DBHelper.addRequestToQueue(url, {}, method, '')
-              .then(offline_key => console.log('offline_key', offline_key));
+              .then(offlineKey => console.log('offline_key', offlineKey));
           });
         callback(err, null);
       });

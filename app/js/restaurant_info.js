@@ -39,22 +39,6 @@ initMap = () => {
   });
 }
 
-/* window.initMap = () => {
-  fetchRestaurantFromURL((error, restaurant) => {
-    if (error) { // Got an error!
-      console.error(error);
-    } else {
-      self.map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: restaurant.latlng,
-        scrollwheel: false
-      });
-      fillBreadcrumb();
-      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
-    }
-  });
-} */
-
 /**
  * Get current restaurant from page URL.
  */
@@ -116,11 +100,11 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     favoriteClickHandler(evt, favButton, restaurant);    // <- new
   }, false);
 
-  // fill operating hours
+  // Fill operating hours
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
+  // Fill reviews
   DBHelper.fetchReviewsById(restaurant.id, fillReviewsHTML);
 }
 
@@ -241,7 +225,7 @@ getParameterByName = (name, url) => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-var focusedElementBeforeModal;
+let focusedElementBeforeModal;
 const modal = document.getElementById('modal');
 const modalOverlay = document.querySelector('.modal-overlay');
 
@@ -264,15 +248,15 @@ const openModal = () => {
   form.addEventListener('submit', saveAddReview, false);
 
   // Find all focusable children
-  var focusableElementsString = 'a[href], area[href], input:not([disabled]),' +
+  let focusableElementsString = 'a[href], area[href], input:not([disabled]),' +
     'select:not([disabled]), textarea:not([disabled]), button:not([disabled]),' +
     'iframe, object, embed, [tabindex="0"], [contenteditable]';
-  var focusableElements = modal.querySelectorAll(focusableElementsString);
+  let focusableElements = modal.querySelectorAll(focusableElementsString);
   // Convert NodeList to Array
   focusableElements = Array.prototype.slice.call(focusableElements);
 
-  var firstTabStop = focusableElements[0];
-  var lastTabStop = focusableElements[focusableElements.length - 1];
+  let firstTabStop = focusableElements[0];
+  let lastTabStop = focusableElements[focusableElements.length - 1];
 
   // Show the modal and overlay
   modal.classList.add('show');
@@ -324,7 +308,6 @@ const saveAddReview = (e) => {
 
     DBHelper.createRestaurantReview(restaurant_id, name, rating, comments,
       (error, review) => {
-      console.log('got callback');
       form.reset();
       if (error) {
         console.log('We are offline. Review has been saved to the queue.');

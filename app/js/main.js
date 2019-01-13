@@ -181,8 +181,8 @@ createRestaurantHTML = (restaurant) => {
     favButton.title = addFavoriteLabel;
   }
 
-  favButton.addEventListener('click', (evt) => {          // <- new
-    favoriteClickHandler(evt, favButton, restaurant);     // <- new
+  favButton.addEventListener('click', (evt) => {
+    favoriteClickHandler(evt, favButton, restaurant);
   }, false);
   li.append(favButton);
 
@@ -228,13 +228,3 @@ addMarkersToMap = (restaurants = self.restaurants) => {
   });
 
 }
-/* addMarkersToMap = (restaurants = self.restaurants) => {
-  restaurants.forEach(restaurant => {
-    // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
-    google.maps.event.addListener(marker, 'click', () => {
-      window.location.href = marker.url
-    });
-    self.markers.push(marker);
-  });
-} */

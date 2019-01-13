@@ -91,10 +91,9 @@ self.showOffline = showOffline;
 const favoriteClickHandler = (evt, fav, restaurant) => {
   evt.preventDefault();
   console.log(`Is favourite: ${restaurant.is_favorite}`);
-  const is_favorite = JSON.parse(restaurant.is_favorite); // set to boolean
+  const is_favorite = JSON.parse(restaurant.is_favorite);
 
   DBHelper.toggleFavorite(restaurant, (error, restaurant) => {
-    console.log('got callback');
     if (error) {
       console.log('We are offline. Review has been saved to the queue.');
       showOffline();
@@ -104,7 +103,7 @@ const favoriteClickHandler = (evt, fav, restaurant) => {
     }
   });
 
-  // set ARIA, text, & labels
+  // Update ARIA, text, & labels
   if (is_favorite) {
     fav.setAttribute('aria-pressed', 'false');
     fav.innerHTML = `Add ${restaurant.name} as a favorite`;

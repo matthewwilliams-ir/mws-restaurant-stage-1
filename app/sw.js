@@ -48,18 +48,15 @@ self.addEventListener('install', event => {
   );
 });
 
-let i = 0;
 self.addEventListener('fetch', event => {
   const request = event.request;
   const requestUrl = new URL(request.url);
 
   if (requestUrl.port === '1337') {
-    // Only intercept GET requests
+    // Ignore non-GET requests
     if (event.request.method !== 'GET') {
       return;
     }
-
-    console.log('fetch intercept', ++i, requestUrl.href);
 
     if (request.url.includes('reviews')) {
       let id = +requestUrl.searchParams.get('restaurant_id');
@@ -80,7 +77,6 @@ function cacheResponse(request) {
   }).catch(error => new Response(error));
 }
 
-let j = 0;
 function idbRestaurantResponse(request, id) {
 
   return idbKeyVal.getAll('restaurants')
@@ -91,9 +87,8 @@ function idbRestaurantResponse(request, id) {
       return fetch(request)
         .then(response => response.json())
         .then(json => {
-          json.forEach(restaurant => {  // <- this line loops thru the json
-            console.log('fetch idb write', ++j, restaurant.id, restaurant.name);
-            idbKeyVal.set('restaurants', restaurant); // <- writes each record
+          json.forEach(restaurant => {
+            idbKeyVal.set('restaurants', restaurant);
           });
           return json;
         });
@@ -102,12 +97,11 @@ function idbRestaurantResponse(request, id) {
     .catch(error => {
       return new Response(error, {
         status: 404,
-        statusText: 'my bad request'
+        statusText: 'Bad Request'
       });
     });
 }
 
-let k = 0;
 function idbReviewResponse(request, id) {
   return idbKeyVal.getAllIdx('reviews', 'restaurant_id', id)
     .then(reviews => {
@@ -118,7 +112,6 @@ function idbReviewResponse(request, id) {
         .then(response => response.json())
         .then(json => {
           json.forEach(review => {
-            console.log('fetch idb review write', ++k, review.id, review.name);
             idbKeyVal.set('reviews', review);
           });
           return json;
@@ -128,7 +121,7 @@ function idbReviewResponse(request, id) {
     .catch(error => {
       return new Response(error, {
         status: 404,
-        statusText: 'my bad request'
+        statusText: 'Bad Request'
       });
     });
 }
