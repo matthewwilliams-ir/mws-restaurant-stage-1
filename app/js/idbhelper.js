@@ -15,6 +15,8 @@ const dbPromise = idb.open("restaurant-db", 3, upgradeDB => {
   }
 });
 
+self.dbPromise = dbPromise;
+
 const idbKeyVal = {
   get(store, key) {
     return dbPromise.then(db => {
@@ -61,3 +63,27 @@ const idbKeyVal = {
 };
 
 self.idbKeyVal = idbKeyVal;
+
+const wait = function (ms) {
+  return new Promise(function (resolve, reject) {
+    window.setTimeout(function () {
+      resolve(ms);
+      reject(ms);
+    }, ms);
+  });
+};
+self.wait = wait;
+
+const showOffline = () => {
+  document.querySelector('#offline').setAttribute('aria-hidden', false);
+  document.querySelector('#offline').setAttribute('aria-live', 'assertive');
+  document.querySelector('#offline').classList.add('show');
+
+  wait(8000).then(() => {
+    document.querySelector('#offline').setAttribute('aria-hidden', true);
+    document.querySelector('#offline').setAttribute('aria-live', 'off');
+    document.querySelector('#offline').classList.remove('show');
+  });
+};
+
+self.showOffline = showOffline;

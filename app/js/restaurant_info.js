@@ -9,28 +9,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 window.addEventListener('load', function () {
-  const isOffline = getParameterByName('isOffline');
-
-  if (isOffline) {
-    document.querySelector('#offline').setAttribute('aria-hidden', false);
-    document.querySelector('#offline').setAttribute('aria-live', 'assertive');
-    document.querySelector('#offline').classList.add('show');
-
-    wait(8000).then(() => {
-      document.querySelector('#offline').setAttribute('aria-hidden', true);
-      document.querySelector('#offline').setAttribute('aria-live', 'off');
-      document.querySelector('#offline').classList.remove('show');
-    });
-  }
-
-  function wait(ms) {
-    return new Promise(function (resolve, reject) {
-      window.setTimeout(function () {
-        resolve(ms);
-        reject(ms);
-      }, ms);
-    });
-  }
+  DBHelper.processQueue();
 });
 
 /**
@@ -184,12 +163,14 @@ fillReviewsHTML = (error, reviews) => {
   self.restaurant.reviews = reviews;
 
   const reviewsHeader = document.getElementById('reviews-header');
+  reviewsHeader.innerHTML = '';
 
   const reviewsTitle = document.createElement('h2');
   reviewsTitle.innerHTML = 'Reviews';
   reviewsHeader.appendChild(reviewsTitle);
 
   const addReview = document.createElement('button');
+  addReview.id = 'review-add-btn';
   addReview.classList.add('review-add-btn');
   addReview.setAttribute('aria-label', 'add review');
   addReview.title = 'Add Review';
@@ -204,6 +185,8 @@ fillReviewsHTML = (error, reviews) => {
     return;
   }
   const ul = document.getElementById('reviews-list');
+  ul.innerHTML = '';
+  reviews.reverse();
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
@@ -346,24 +329,28 @@ const saveAddReview = (e) => {
   if (form.checkValidity()) {
     console.log('is valid');
 
-    const restaurantId = self.restaurant.id;
+    const restaurant_id = self.restaurant.id;
     const name = document.querySelector('#reviewName').value;
     const rating = document.querySelector('input[name=rate]:checked').value;
     const comments = document.querySelector('#reviewComments').value;
 
-    DBHelper.createRestaurantReview(restaurantId, name, rating, comments,
+    DBHelper.createRestaurantReview(restaurant_id, name, rating, comments,
       (error, review) => {
       console.log('got callback');
       form.reset();
       if (error) {
         console.log('We are offline. Review has been saved to the queue.');
-        window.location.href =
-          `/restaurant.html?id=${self.restaurant.id}&isOffline=true`;
+        showOffline();
       } else {
         console.log('Received updated record from DB Server', review);
         DBHelper.createIDBReview(review);
-        window.location.href = `/restaurant.html?id=${self.restaurant.id}`;
       }
+      idbKeyVal.getAllIdx('reviews', 'restaurant_id', restaurant_id)
+        .then(reviews => {
+          fillReviewsHTML(null, reviews);
+          closeModal();
+          document.getElementById('review-add-btn').focus();
+        });
     });
   }
 };

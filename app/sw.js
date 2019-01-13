@@ -1,9 +1,12 @@
-const staticCacheName = 'restaurant-info-v6';
+const staticCacheName = 'restaurant-info-v7';
 const urlsToCache = [
   '/',
   'index.html',
   'restaurant.html',
   'js/dbhelper.js',
+  'js/dbhelper.min.js',
+  'js/idbhelper.js',
+  'js/idb.js',
   'js/main.js',
   'js/restaurant_info.js',
   'sw.js',
@@ -17,6 +20,7 @@ const urlsToCache = [
   'img/8.jpg',
   'img/9.jpg',
   'img/10.jpg',
+  '/img/icons/icon.png',
   '/restaurant.html?id=1',
   '/restaurant.html?id=2',
   '/restaurant.html?id=3',
@@ -41,6 +45,7 @@ self.addEventListener('install', event => {
   );
 });
 
+let i = 0;
 self.addEventListener('fetch', event => {
   const request = event.request;
   const requestUrl = new URL(request.url);
@@ -50,6 +55,8 @@ self.addEventListener('fetch', event => {
     if (event.request.method !== 'GET') {
       return;
     }
+
+    console.log('fetch intercept', ++i, requestUrl.href);
 
     if (request.url.includes('reviews')) {
       let id = +requestUrl.searchParams.get('restaurant_id');

@@ -198,6 +198,9 @@ class DBHelper {
   }
 
   static createRestaurantReview(restaurant_id, name, rating, comments, callback) {
+    const url = DBHelper.DATABASE_URL + '/reviews/';
+    const headers = { 'Content-Type': 'application/form-data' };
+    const method = 'POST';
     const data = {
       restaurant_id: restaurant_id,
       name: name,
@@ -206,9 +209,9 @@ class DBHelper {
     };
     const body = JSON.stringify(data);
 
-    fetch(DBHelper.DATABASE_URL + '/reviews/', {
-      headers: { 'Content-Type': 'application/form-data' },
-      method: 'POST',
+    fetch(url, {
+      headers: headers,
+      method: method,
       body: body
     })
     .then(response => response.json())
@@ -246,6 +249,79 @@ class DBHelper {
         console.log('Saved to IDB: offline', request);
         return id;
       });
+  }
+
+  static processQueue() {
+    // Open offline queue & return cursor
+    dbPromise.then(db => {
+      if (!db) return;
+      const tx = db.transaction(['offline'], 'readwrite');
+      const store = tx.objectStore('offline');
+      return store.openCursor();
+    })
+      .then(function nextRequest (cursor) {
+        if (!cursor) {
+          console.log('cursor done.');
+          return;
+        }
+        console.log('cursor', cursor.value.data.name, cursor.value.data);
+
+        const offline_key = cursor.key;
+        const url = cursor.value.url;
+        const headers = cursor.value.headers;
+        const method = cursor.value.method;
+        const data = cursor.value.data;
+        const review_key = cursor.value.review_key;
+        const body = JSON.stringify(data);
+
+        // update server with HTTP POST request & get updated record back
+        fetch(url, {
+          headers: headers,
+          method: method,
+          body: body
+        })
+          .then(response => response.json())
+          .then(data => {
+            // data is returned record
+            console.log('Received updated record from DB Server', data);
+            // test if this is a review or favorite update
+
+            // 1. Delete http request record from offline store
+            dbPromise.then(db => {
+              const tx = db.transaction(['offline'], 'readwrite');
+              tx.objectStore('offline').delete(offline_key);
+              return tx.complete;
+            })
+              .then(() => {
+                // 2. Add new review record to reviews store
+                // 3. Delete old review record from reviews store
+                dbPromise.then(db => {
+                  const tx = db.transaction(['reviews'], 'readwrite');
+                  return tx.objectStore('reviews').put(data)
+                    .then(() => tx.objectStore('reviews').delete(review_key))
+                    .then(() => {
+                      console.log('tx complete reached.');
+                      return tx.complete;
+                    })
+                    .catch(err => {
+                      tx.abort();
+                      console.log('transaction error: tx aborted', err);
+                    });
+                })
+                  .then(() => console.log('review transaction success!'))
+                  .catch(err => console.log('reviews store error', err));
+              })
+              .then(() => console.log('offline rec delete success!'))
+              .catch(err => console.log('offline store error', err));
+          }).catch(err => {
+            console.log('fetch error. we are offline.');
+            console.log(err);
+            return;
+          });
+        return cursor.continue().then(nextRequest);
+      })
+      .then(() => console.log('Done cursoring'))
+      .catch(err => console.log('Error opening cursor', err));
   }
 
 }
