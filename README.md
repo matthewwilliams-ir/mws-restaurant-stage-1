@@ -2,6 +2,44 @@
 ---
 #### _Three Stage Course Material Project - Restaurant Reviews_
 
+## Project Overview: Stage 3
+
+For Stage 3, you will take the connected application you built in Stage 1 and Stage 2 and add additional functionality. You will add a form to allow users to create their own reviews. If the app is offline, your form will defer updating to the remote database until a connection is established. Finally, you’ll work to optimize your site to meet even stricter performance benchmarks than the previous project, and test again using Lighthouse.
+The gulp build system is used to build and serve the optimized site.
+
+## Instructions
+
+### 1. Start the Local Development API Server
+
+Start the local development API server by cloning https://github.com/udacity/mws-restaurant-stage-2 and following the instructions in the README.
+
+### 2. Serve the optimized site
+
+Run the following command to build and serve the optimized site:
+
+```bash
+gulp serve
+```
+
+This will build and output the site to the `dist/` directory and start the server at `http://localhost:8000`.
+
+Open `http://localhost:8000` in your browser.
+
+#### Only build
+
+```bash
+gulp
+```
+This will only build and output the site to the `dist/` directory.
+
+#### Clean the output directory
+
+```bash
+gulp clean
+```
+
+This will clean the `dist/` output directory
+
 ## Project Overview: Stage 2
 
 Stage 2 makes use of the gulp build system to build and serve the optimized site.
@@ -37,7 +75,7 @@ This will only build and output the site to the `dist/` directory.
 gulp clean
 ```
 
-This will clean the `dist/` output directory 
+This will clean the `dist/` output directory
 
 
 ## Project Overview: Stage 1
